@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hlutverkaleikur í Íslensku</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+        .chat-container {
+            width: 400px;
+            height: 500px;
+            background: white;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+        .chat-box {
+            display: flex;
+            flex-direction: column;
+            height: 90%;
+            overflow-y: auto;
+        }
+        .chat-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .message {
+            margin: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .bot {
+            background-color: #e3f2fd;
+            align-self: flex-start;
+        }
+        .user {
+            background-color: #c8e6c9;
+            align-self: flex-end;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-box" id="chat-box">
+            <div class="message bot">Hæ! Ég heiti Íslenskuþjálfarinn. Hvað heitir þú?</div>
+        </div>
+        <input type="text" class="chat-input" id="chat-input" placeholder="Skrifaðu svar hér..." onkeypress="sendMessage(event)">
+    </div>
+
+    <script>
+        function sendMessage(event) {
+            if (event.key === "Enter") {
+                let input = document.getElementById("chat-input");
+                let chatBox = document.getElementById("chat-box");
+                let userMessage = input.value;
+                input.value = "";
+
+                if (userMessage.trim() === "") return;
+
+                let userDiv = document.createElement("div");
+                userDiv.classList.add("message", "user");
+                userDiv.textContent = userMessage;
+                chatBox.appendChild(userDiv);
+
+                setTimeout(() => {
+                    let botDiv = document.createElement("div");
+                    botDiv.classList.add("message", "bot");
+                    botDiv.textContent = generateResponse(userMessage);
+                    chatBox.appendChild(botDiv);
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        function generateResponse(message) {
+            const corrections = [
+                "Mjög gott svar! Þú gætir einnig sagt það svona: ...",
+                "Flott! Passaðu að nota réttan orðaforða hér: ...",
+                "Vel gert! Smá leiðrétting: ...",
+                "Mjög gott! Þú ert að bæta þig!",
+                "Ég skil þig vel! Ef þú vilt, geturðu reynt að segja þetta á aðeins formlegri hátt."
+            ];
+            return corrections[Math.floor(Math.random() * corrections.length)];
+        }
+    </script>
+</body>
+</html>
