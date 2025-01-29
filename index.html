@@ -56,7 +56,7 @@
 <body>
     <div class="chat-container">
         <div class="chat-box" id="chat-box">
-            <div class="message bot">Hæ! Ég heiti Íslenskuþjálfarinn. Hvað heitir þú?</div>
+            <div class="message bot">Hæ! Ég heiti Spjallmennið. Hvað finnst þér skemmtilegt að gera?</div>
         </div>
         <input type="text" class="chat-input" id="chat-input" placeholder="Skrifaðu svar hér...">
     </div>
@@ -92,11 +92,12 @@
 
         function generateResponse(message) {
             const responses = [
-                "Mjög gott svar! Þú gætir einnig sagt það svona: ...",
-                "Flott! Passaðu að nota réttan orðaforða hér: ...",
-                "Vel gert! Smá leiðrétting: ...",
-                "Mjög gott! Þú ert að bæta þig!",
-                "Ég skil þig vel! Ef þú vilt, geturðu reynt að segja þetta á aðeins formlegri hátt."
+                "Ótrúlega áhugavert! Geturðu sagt mér meira?",
+                "Vá, það hljómar skemmtilega! Hvernig byrjaðir þú á því?",
+                "Mjög áhugavert! Hvað gerir þetta spennandi fyrir þig?",
+                "Það er frábært! Er þetta eitthvað sem þú hefur gert lengi?",
+                "Gaman að heyra! Hvað finnst þér mest krefjandi við þetta?",
+                "Ég er svo forvitin/n! Hvað hefurðu lært af þessu?"
             ];
             return responses[Math.floor(Math.random() * responses.length)];
         }
