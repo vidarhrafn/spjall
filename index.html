@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hlutverkaleikur í Íslensku</title>
+    <title>Hlutverkaleikur Ã­ Ãslensku</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -53,9 +53,9 @@
 <body>
     <div class="chat-container">
         <div class="chat-box" id="chat-box">
-            <div class="message bot">Hæ! Ég heiti Íslenskuşjálfarinn. Hvağ heitir şú?</div>
+            <div class="message bot">HÃ¦! Ã‰g heiti ÃslenskuÃ¾jÃ¡lfarinn. HvaÃ° heitir Ã¾Ãº?</div>
         </div>
-        <input type="text" class="chat-input" id="chat-input" placeholder="Skrifağu svar hér..." onkeypress="sendMessage(event)">
+        <input type="text" class="chat-input" id="chat-input" placeholder="SkrifaÃ°u svar hÃ©r..." onkeypress="sendMessage(event)">
     </div>
 
     <script>
@@ -85,11 +85,11 @@
 
         function generateResponse(message) {
             const corrections = [
-                "Mjög gott svar! Şú gætir einnig sagt şağ svona: ...",
-                "Flott! Passağu ağ nota réttan orğaforğa hér: ...",
-                "Vel gert! Smá leiğrétting: ...",
-                "Mjög gott! Şú ert ağ bæta şig!",
-                "Ég skil şig vel! Ef şú vilt, geturğu reynt ağ segja şetta á ağeins formlegri hátt."
+                "MjÃ¶g gott svar! ÃÃº gÃ¦tir einnig sagt Ã¾aÃ° svona: ...",
+                "Flott! PassaÃ°u aÃ° nota rÃ©ttan orÃ°aforÃ°a hÃ©r: ...",
+                "Vel gert! SmÃ¡ leiÃ°rÃ©tting: ...",
+                "MjÃ¶g gott! ÃÃº ert aÃ° bÃ¦ta Ã¾ig!",
+                "Ã‰g skil Ã¾ig vel! Ef Ã¾Ãº vilt, geturÃ°u reynt aÃ° segja Ã¾etta Ã¡ aÃ°eins formlegri hÃ¡tt."
             ];
             return corrections[Math.floor(Math.random() * corrections.length)];
         }
