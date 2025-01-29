@@ -83,7 +83,7 @@
             userDiv.textContent = userMessage;
             chatBox.appendChild(userDiv);
 
-            fetch("https://api.openai.com/v1/chat/completions", {
+            fetch("https://arni-backend.vercel.app/api/chat", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
