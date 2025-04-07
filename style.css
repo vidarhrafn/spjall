@@ -1,77 +1,95 @@
-/* style.css – Tækniskólinn prófa- og æfingayfirbragð */
+:root {
+  --blue-bg: #5e9cae;     /* Pantone 549C */
+  --orange: #e05206;      /* Pantone 166C */
+  --dark-blue: #003f72;   /* Pantone 541C */
+  --light-gray: #f5f5f5;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
+  padding: 0;
   font-family: Arial, sans-serif;
-  background-color: rgb(94, 156, 174); /* Pantone 549C */
-  color: #000;
+  background-color: var(--blue-bg);
 }
 
-header {
-  background-color: #fff;
-  padding: 4px 8px;
+.top-bar {
+  background-color: white;
+  padding: 1rem 2rem;
   display: flex;
   align-items: center;
-  border-bottom: 3px solid rgb(224, 82, 6); /* Pantone 166C */
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-header img {
-  height: 28px;
+.top-bar img {
+  height: 50px;
 }
 
 .container {
-  max-width: 600px;
-  margin: 30px auto;
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 2rem;
   background-color: white;
-  border: 2px solid rgb(224, 82, 6);
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-h1 {
-  color: rgb(0, 63, 114); /* Pantone 541C */
+h1, h2 {
+  color: var(--dark-blue);
+  margin-top: 0;
 }
 
 .progress-bar {
-  width: 100%;
+  height: 20px;
   background-color: #ddd;
-  border-radius: 5px;
+  border-radius: 10px;
   overflow: hidden;
-  margin: 10px 0 20px;
+  margin-bottom: 2rem;
 }
 
 .progress {
+  height: 100%;
   width: 0%;
-  height: 12px;
-  background-color: rgb(0, 63, 114);
+  background-color: var(--orange);
+  transition: width 0.3s ease;
 }
 
 .question {
-  margin: 20px 0;
+  display: none;
 }
 
-input[type="text"], select {
-  padding: 6px;
+.question.active {
+  display: block;
+}
+
+label {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+input[type="text"] {
+  font-size: 1rem;
+  padding: 0.5rem;
   width: 100%;
-  border-radius: 5px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  margin-top: 0.25rem;
 }
 
-button {
-  padding: 10px 16px;
-  background-color: rgb(0, 63, 114);
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 10px;
+input[type="text"]:focus {
+  outline: none;
+  border-color: var(--orange);
+  box-shadow: 0 0 0 2px rgba(224, 82, 6, 0.3);
 }
 
-button:hover {
-  background-color: rgb(0, 50, 90);
+.end-message {
+  text-align: center;
+  background-color: var(--light-gray);
+  padding: 1.5rem;
+  border-radius: 12px;
 }
 
-.feedback {
-  margin-top: 20px;
-  font-weight: bold;
-  color: green;
-}
