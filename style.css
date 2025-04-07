@@ -32,7 +32,7 @@ body {
 
 .tsk-header h1 {
   color: var(--dark-blue);
-  font-size: 1rem; /* fast stærð án bils */
+  font-size: 1rem;
   margin: 0;
 }
 
