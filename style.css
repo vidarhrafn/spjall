@@ -72,18 +72,19 @@ label {
 }
 
 input[type="text"] {
-  font-size: 1rem;
-  padding: 0.5rem;
-  width: 100%;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  margin-top: 0.25rem;
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 16px;
+  color: black;
+  outline: none;
+  transition: border 0.3s ease;
 }
 
 input[type="text"]:focus {
-  outline: none;
-  border-color: var(--orange);
-  box-shadow: 0 0 0 2px rgba(224, 82, 6, 0.3);
+  border-color: rgb(224,82,6); /* Pantone 166C appelsínugulur */
+  box-shadow: 0 0 3px rgba(224,82,6,0.5);
 }
 
 .end-message {
