@@ -157,3 +157,12 @@ table input {
   padding: 4px;
   text-align: center;
 }
+select {
+  display: inline-block;
+  width: auto;
+  min-width: 80px;
+  max-width: 120px;
+  padding: 4px;
+  font-size: 1em;
+  vertical-align: middle;
+}
