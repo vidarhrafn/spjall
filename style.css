@@ -32,7 +32,7 @@ body {
 
 .tsk-header h1 {
   color: var(--dark-blue);
-  font-size: 1 rem;
+  font-size: 1rem; /* fast stærð án bils */
   margin: 0;
 }
 
@@ -101,15 +101,16 @@ label {
 }
 
 input[type="text"] {
-  width: auto;
-  max-width: 200px; /* eykst sjálfkrafa við lengri orð */background-color: white;
+  background-color: white;
   border: 2px solid #ccc;
   border-radius: 6px;
   padding: 6px 10px;
   font-size: 16px;
   color: black;
   outline: none;
-  width: 120px;
+  width: auto;
+  min-width: 80px;
+  max-width: 200px;
   margin: 0 6px;
   vertical-align: middle;
   transition: border 0.3s ease, box-shadow 0.3s ease;
