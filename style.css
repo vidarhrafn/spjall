@@ -188,3 +188,14 @@ select {
   background-color: #f3f3f3;
   min-height: 100px;
 }
+.feedback {
+  margin-top: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+.feedback.correct {
+  color: #218838;
+}
+.feedback:not(.correct) {
+  color: #dc3545;
+}
