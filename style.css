@@ -166,3 +166,25 @@ select {
   font-size: 1em;
   vertical-align: middle;
 }
+.layout {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.items, .rooms {
+  flex: 1 1 40%;
+  min-width: 200px;
+}
+.item, .room {
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  cursor: grab;
+}
+.room {
+  background-color: #f3f3f3;
+  min-height: 100px;
+}
