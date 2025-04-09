@@ -1,15 +1,103 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
 body {
-  font-family: sans-serif;
+  font-family: 'Inter', sans-serif;
+  background-color: #f4f9fa;
+  color: #003f6c;
   margin: 0;
-  padding: 0;
-  background-color: #5e9cae;
+  padding: 1rem;
 }
 
-h2 {
-  margin: 20px;
-  color: #003b5e;
+/* ----- Header og lógó ----- */
+header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
+header img {
+  height: 60px;
+}
+
+h1, h2 {
+  color: #003f6c;
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+/* ----- Framvindustika ----- */
+.progress-bar {
+  background-color: #cce3eb;
+  border-radius: 10px;
+  height: 16px;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.progress-bar > div,
+.progress {
+  height: 100%;
+  background-color: #003f6c;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+
+/* ----- Spurningar og umgjörð ----- */
+.question {
+  background-color: white;
+  border: 2px solid #dce8ed;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+button,
+.submit-btn {
+  background-color: #e05206;
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 1rem;
+}
+
+button:hover,
+.submit-btn:hover {
+  background-color: #cc4705;
+}
+
+/* ----- Eyðufylling / valreitir ----- */
+select {
+  appearance: none;
+  max-width: 120px;
+  padding: 0.4rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  margin: 0 4px;
+  background-color: #fff;
+}
+
+/* ----- Endurgjöf ----- */
+.feedback {
+  padding: 1rem;
+  border-left: 4px solid #003f6c;
+  background-color: #eaf3f7;
+  margin-top: 1rem;
+  border-radius: 8px;
+}
+
+/* ================================= */
+/* ========== DRAG & DROP ========== */
+/* ================================= */
+
+/* Uppsetning fyrir tvo dálka */
 .container {
   display: flex;
   flex-direction: row;
@@ -19,84 +107,47 @@ h2 {
   padding: 0 20px 40px;
 }
 
-.draggables {
+.draggables,
+.categories {
   flex: 1;
   min-width: 250px;
   padding-top: 10px;
 }
 
-.categories {
-  flex: 1;
-  min-width: 250px;
-}
-
+/* Drag element (orð) */
 .draggable {
-  background-color: #fff;
+  background-color: #e05206;
+  color: white;
   padding: 10px 15px;
   margin-bottom: 10px;
-  border: 2px solid #0094c6;
-  border-radius: 12px;
+  border-radius: 8px;
   cursor: grab;
   text-align: center;
+  border: none;
   box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
 }
 
+/* Drop zones (flokka reitir) */
 .dropzone {
-  min-height: 100px;
+  min-height: 80px;
   border: 2px dashed #ccc;
   padding: 10px;
   margin-bottom: 20px;
   border-radius: 12px;
   background-color: #eef6f8;
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  font-weight: 600;
+  color: #00446e;
 }
 
 .dropzone h3 {
   margin-top: 0;
   padding-top: 8px;
-  color: #00446e;
 }
 
 .dropped {
   margin-top: 5px;
 }
 
-.progress-bar {
-  height: 8px;
-  background-color: #ddd;
-  margin: 0 20px 20px;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress {
-  height: 100%;
-  width: 0%;
-  background-color: #00446e;
-  transition: width 0.3s;
-}
-
-.submit-btn {
-  background-color: #e05206;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  margin: 0 20px 20px;
-}
-
-.feedback {
-  background-color: #fff;
-  margin: 20px;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.1);
-}
-
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-}
+/* ----- Sýna grænt eða rautt þegar svarað*
