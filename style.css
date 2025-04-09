@@ -9,6 +9,9 @@ body {
 }
 
 header {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -17,6 +20,7 @@ header {
 
 header img {
   height: 60px;
+  max-width: 100px;
 }
 
 h1, h2 {
