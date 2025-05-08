@@ -1,140 +1,359 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+/* Tækniskóli CSS stilablað fyrir námsæfingar */
+
+/* Grunnbreytur fyrir litapallettu */
+:root {
+  /* Aðal litapallettan frá Tækniskólanum */
+  --tskoli-blue: #5E9CAE; /* Pantone 549C, RGB 94R 156G 174B */
+  --tskoli-light-blue: #C4D3DE; /* Ljósari útgáfa af Pantone 549C fyrir bakgrunn */
+  --tskoli-orange: #E0520B; /* Pantone 166C, RGB 224R 82G 6B */
+  --tskoli-dark-blue: #003F72; /* Pantone 541C, RGB 0R 63G 114B */
+  
+  /* Viðbótarlitir fyrir viðmótið */
+  --background-color: var(--tskoli-light-blue); /* Ljósblár bakgrunnur */
+  --text-color: #333333;
+  --border-color: #dee2e6;
+  --success-color: #28a745;
+  --error-color: #dc3545;
+  --hint-color: #ffc107;
+  
+  /* Skipulags breytur */
+  --header-height: 70px;
+  --container-max-width: 800px;
+  --border-radius: 8px;
+  --spacing-small: 8px;
+  --spacing-medium: 16px;
+  --spacing-large: 24px;
+}
+
+/* Grunnskipulag */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Arial', sans-serif;
+}
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: #5e9cae;
-  color: #003f6c;
-  margin: 0;
-  padding: 1rem;
+  background-color: var(--background-color); /* Ljósblár bakgrunnur */
+  color: var(--text-color);
+  line-height: 1.6;
 }
 
-header {
+/* Header með lógói Tækniskólans */
+.tskoli-header {
   background-color: white;
-  padding: 1rem;
-  border-radius: 12px;
+  height: var(--header-height);
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  padding: 0 var(--spacing-large);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
 }
 
-header img {
-  height: 60px;
-  max-width: 100px;
+.tskoli-logo {
+  height: 40px;
+  margin-right: var(--spacing-medium);
 }
 
-h1, h2 {
-  font-size: 1.75rem;
-  margin: 0 0 1rem 0;
-  color: #003f6c;
+.tskoli-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--tskoli-dark-blue);
+  margin-left: var(--spacing-medium);
 }
 
-.progress-bar {
-  background-color: #cce3eb;
-  border-radius: 10px;
-  height: 16px;
+/* Grunnskipulag innihald */
+.exercise-container {
+  max-width: var(--container-max-width);
+  margin: calc(var(--header-height) + var(--spacing-large)) auto var(--spacing-large);
+  padding: var(--spacing-large);
+  background-color: white; /* Hvítur rammi fyrir æfingar */
+  border-radius: var(--border-radius);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Yfirlitsstöðutexti */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-medium);
+}
+
+.question-counter {
+  font-size: 0.9rem;
+  color: var(--text-color);
+}
+
+.score-display {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--tskoli-dark-blue);
+}
+
+/* Framvindusláin */
+.progress-bar-container {
   width: 100%;
-  margin-bottom: 1.5rem;
+  height: 6px;
+  background-color: var(--border-color);
+  border-radius: 10px;
+  margin-bottom: var(--spacing-large);
   overflow: hidden;
 }
 
-.progress-bar > div {
+.progress-bar {
   height: 100%;
-  background-color: #003f6c;
-  width: 0%;
-  transition: width 0.4s ease;
+  background-color: var(--tskoli-blue);
+  border-radius: 10px;
+  transition: width 0.3s ease;
 }
 
-.question {
-  background-color: white;
-  border: 2px solid #dce8ed;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-/* Cloze – select (felligluggar) */
-select {
-  appearance: none;
-  background-color: #fff;
-  padding: 0.4rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  max-width: 120px;
-  margin: 0 4px;
-}
-
-/* Drag and Drop */
-.container {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.draggables,
-.categories {
-  flex: 1;
-  min-width: 240px;
-}
-
-.draggable {
-  background-color: #e05206;
-  color: white;
-  padding: 10px 15px;
-  margin-bottom: 10px;
-  border-radius: 8px;
-  cursor: grab;
+/* Spurningasvæði */
+.question-area {
+  margin: var(--spacing-large) 0;
   text-align: center;
 }
 
-.dropzone {
-  min-height: 80px;
-  border: 2px dashed #ccc;
-  padding: 10px;
-  border-radius: 12px;
-  background-color: #eef6f8;
-  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.05);
+.question-title {
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-large);
+  color: var(--tskoli-dark-blue);
 }
 
-.placeholder {
-  color: #888;
-  font-style: italic;
-}
-
-.category-box {
-  margin-bottom: 1.5rem;
-}
-
-.category-title {
+.verb-display, .sentence-display {
+  font-size: 1.5rem;
   font-weight: bold;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--spacing-large);
 }
 
-button {
-  background-color: #e05206;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
+.verb-infinitive {
+  color: var(--text-color);
+  font-style: italic;
   font-size: 1rem;
-  border-radius: 8px;
+  margin-bottom: var(--spacing-large);
+}
+
+/* Valmyndin */
+.options-container {
+  width: 100%;
+  margin: var(--spacing-medium) 0;
+}
+
+.option-button {
+  width: 100%;
+  padding: var(--spacing-medium);
+  margin-bottom: var(--spacing-small);
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  background-color: #f0f0f0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
   cursor: pointer;
-  margin-top: 1rem;
+  transition: all 0.2s ease;
 }
 
-.feedback {
-  margin-top: 1rem;
-  padding: 1rem;
-  background-color: #eaf3f7;
-  border-left: 4px solid #003f6c;
-  border-radius: 8px;
+.option-button:hover {
+  background-color: #e8e8e8;
 }
 
-/* Responsiveness */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
+.option-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--tskoli-blue);
+}
+
+.selected-option {
+  background-color: var(--tskoli-blue);
+  color: white;
+}
+
+.correct-answer {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.incorrect-answer {
+  background-color: var(--error-color);
+  color: white;
+}
+
+/* Inntak reitur */
+.answer-input {
+  font-size: 1.2rem;
+  padding: var(--spacing-small);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  text-align: center;
+  margin: 0 var(--spacing-small);
+  width: 120px;
+}
+
+.answer-input:focus {
+  outline: none;
+  border-color: var(--tskoli-blue);
+}
+
+.correct-input {
+  border-color: var(--success-color);
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.incorrect-input {
+  border-color: var(--error-color);
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Hnappar */
+.button-container {
+  width: 100%;
+  margin-top: var(--spacing-large);
+}
+
+.primary-button {
+  width: 100%;
+  padding: var(--spacing-medium);
+  background-color: var(--tskoli-blue);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.primary-button:hover {
+  background-color: #4A8A9B; /* Aðeins dekkri blár */
+}
+
+.secondary-button {
+  width: 100%;
+  padding: var(--spacing-small);
+  background-color: #f0f0f0;
+  color: var(--text-color);
+  font-weight: normal;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  margin-top: var(--spacing-small);
+  transition: background-color 0.2s ease;
+}
+
+.secondary-button:hover {
+  background-color: #e0e0e0;
+}
+
+/* Svörun */
+.feedback-message {
+  padding: var(--spacing-medium);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-medium) 0;
+  text-align: center;
+}
+
+.correct-feedback {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #155724;
+}
+
+.incorrect-feedback {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: #721c24;
+}
+
+.hint-message {
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #856404;
+  padding: var(--spacing-medium);
+  border-radius: var(--border-radius);
+  margin-top: var(--spacing-medium);
+}
+
+/* Niðurstöðuskjár */
+.results-container {
+  text-align: center;
+  padding: var(--spacing-large);
+}
+
+.results-title {
+  font-size: 1.8rem;
+  color: var(--tskoli-dark-blue);
+  margin-bottom: var(--spacing-large);
+}
+
+.final-score {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--tskoli-blue);
+  margin-bottom: var(--spacing-small);
+}
+
+.restart-button {
+  background-color: var(--tskoli-orange);
+  color: white;
+  width: 100%;
+  padding: var(--spacing-medium);
+  font-weight: bold;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: var(--spacing-large);
+}
+
+.restart-button:hover {
+  background-color: #c04609;
+}
+
+/* Eyðufyllingar sérstakar stillingar */
+.fill-in-sentence {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 1.3rem;
+  margin-bottom: var(--spacing-large);
+}
+
+/* Hleðsluskjár */
+.loading-screen {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 1.2rem;
+  color: var(--tskoli-blue);
+}
+
+/* Hreyfimyndir */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* Svörun fyrir farsíma */
+@media (max-width: 600px) {
+  .exercise-container {
+    padding: var(--spacing-medium);
+    margin-top: calc(var(--header-height) + var(--spacing-medium));
+  }
+  
+  .fill-in-sentence {
+    font-size: 1.1rem;
+  }
+  
+  .verb-display, .sentence-display {
+    font-size: 1.3rem;
+  }
+  
+  .answer-input {
+    width: 100px;
   }
 }
-
