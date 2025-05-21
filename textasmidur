@@ -1,0 +1,925 @@
+  // Combine word with previous or next word
+  const combineWords = (index, direction) => {
+    // Only proceed if there's a valid index
+    if (index === null) return;
+    
+    const newComposedText = [...composedText];
+    
+    // Get the current word and target word based on direction
+    const targetIndex = direction === 'prev' ? index - 1 : index + 1;
+    
+    // Make sure the target index is valid
+    if (targetIndex < 0 || targetIndex >= newComposedText.length) return;
+    
+    // Get the current word and target word
+    const currentWord = newComposedText[index];
+    const targetWord = newComposedText[targetIndex];
+    
+    // Skip if either is a linebreak
+    if ((typeof currentWord === 'object' && currentWord.type === 'linebreak') ||
+        (typeof targetWord === 'object' && targetWord.type === 'linebreak')) {
+      return;
+    }
+    
+    // Get the text of both words
+    const currentText = typeof currentWord === 'string' ? 
+      currentWord : 
+      (currentWord.type === 'text' ? currentWord.text : '');
+      
+    const targetText = typeof targetWord === 'string' ? 
+      targetWord : 
+      (targetWord.type === 'text' ? targetWord.text : '');
+    
+    // Combine the words with a space
+    const combinedText = direction === 'prev' 
+      ? `${targetText} ${currentText}` 
+      : `${currentText} ${targetText}`;
+    
+    // Replace the two words with the combined word
+    if (direction === 'prev') {
+      // Replace the previous word with the combined word and remove the current word
+      newComposedText[targetIndex] = combinedText;
+      newComposedText.splice(index, 1);
+    } else {
+      // Replace the current word with the combined word and remove the next word
+      newComposedText[index] = combinedText;
+      newComposedText.splice(targetIndex, 1);
+    }
+    
+    // Update the text
+    setComposedText(newComposedText);
+    setSelectedWordIndex(direction === 'prev' ? targetIndex : index);
+  };import React, { useState, useEffect } from 'react';
+
+const generateSuggestions = (mood, words) => {
+  // Dictionary of mood-based suggestions in Icelandic
+  const moodSuggestions = {
+    'sorgleg': ['tár', 'myrkur', 'sakna', 'kveðja', 'einmana', 'þögn', 'horfinn', 'minnist', 'djúpur', 'falla'],
+    'glaðleg': ['bros', 'sól', 'gleði', 'dans', 'hlæja', 'hamingjusöm', 'leikur', 'sumar', 'líf', 'hlátur'],
+    'drungaleg': ['skuggi', 'regn', 'grár', 'þoka', 'kalt', 'dimmt', 'tómur', 'djúpur', 'hljóður', 'týndur'],
+    'rómantísk': ['ást', 'koss', 'hjarta', 'mánaljós', 'hvísl', 'faðmlag', 'eilífð', 'blóm', 'stjörnur', 'heitur'],
+    'upplyftandi': ['von', 'birta', 'kraftur', 'sigur', 'draumur', 'flug', 'hækka', 'frjáls', 'ný', 'tækifæri'],
+    'hugleiðandi': ['hugur', 'spyrja', 'dýpt', 'leita', 'skilningur', 'tími', 'vegur', 'minning', 'spurning', 'undrun']
+  };
+
+  // Get default suggestions based on mood
+  let suggestions = [];
+  
+  if (mood && moodSuggestions[mood.toLowerCase()]) {
+    suggestions = [...moodSuggestions[mood.toLowerCase()]];
+  } else {
+    // If mood not found, provide generic suggestions
+    suggestions = ['orð', 'setning', 'ljóð', 'saga', 'hugur', 'hjarta', 'draumur', 'líf'];
+  }
+  
+  // Add some context-aware suggestions based on user's words
+  if (words && words.length > 0) {
+    const wordAssociations = {
+      'hjarta': ['slá', 'ást', 'rautt', 'tilfinning', 'blóð', 'lífið'],
+      'himinn': ['blár', 'stjörnur', 'ský', 'óendanleiki', 'fugl', 'flug'],
+      'nótt': ['stjörnur', 'tungl', 'draumur', 'svefn', 'þögn', 'dimmt'],
+      'sól': ['hiti', 'sumar', 'geisli', 'bros', 'birta', 'dagur'],
+      'vatn': ['flæði', 'tær', 'djúpt', 'speglun', 'lífið', 'regn'],
+      'tími': ['líður', 'minnist', 'eilífð', 'stundarkorn', 'sekúnda', 'bíða'],
+      'ást': ['hjarta', 'faðmlag', 'þrá', 'sakna', 'eilíf', 'kærleikur'],
+      'draumur': ['sofna', 'vakna', 'vonir', 'framtíð', 'hugarflug', 'ímynda'],
+      'líf': ['vegferð', 'öndun', 'spor', 'dans', 'saga', 'augnablik']
+    };
+    
+    words.forEach(word => {
+      const lowerWord = word.toLowerCase().trim();
+      // Check if we have associations for this word
+      Object.keys(wordAssociations).forEach(key => {
+        if (lowerWord.includes(key) || key.includes(lowerWord)) {
+          // Add some associated words
+          suggestions = [...suggestions, ...wordAssociations[key].slice(0, 3)];
+        }
+      });
+    });
+  }
+  
+  // Remove duplicates and limit number of suggestions
+  return [...new Set(suggestions)].slice(0, 12);
+};
+
+const TextSmidaApp = () => {
+  const [screen, setScreen] = useState(1);
+  const [mood, setMood] = useState('');
+  const [inputText, setInputText] = useState('');
+  const [words, setWords] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [composedText, setComposedText] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [draggedItem, setDraggedItem] = useState(null);
+  const [draggedItemSource, setDraggedItemSource] = useState(null);
+  const [saveMessage, setSaveMessage] = useState('');
+  const [manualText, setManualText] = useState('');
+  const [selectedWordIndex, setSelectedWordIndex] = useState(null);
+  
+  // Context menu for words
+  const [contextMenu, setContextMenu] = useState({
+    visible: false,
+    x: 0,
+    y: 0,
+    wordIndex: null
+  });
+
+  useEffect(() => {
+    if (screen === 2) {
+      // Generate suggestions based on mood and words
+      const newSuggestions = generateSuggestions(mood, words);
+      setSuggestions(newSuggestions);
+    }
+  }, [screen, mood, words]);
+
+  // Add event listener for keyboard shortcuts - after functions are defined
+  useEffect(() => {
+    // The keyboard event handler
+    const handleKeyDown = (e) => {
+      if (selectedWordIndex === null) return;
+      
+      // Toggle between text and button when 't' is pressed
+      if (e.key === 't') {
+        toggleWordFormat(selectedWordIndex);
+        e.preventDefault();
+      }
+      
+      // Add period and line break when '.' is pressed
+      if (e.key === '.') {
+        togglePeriod(selectedWordIndex);
+        e.preventDefault(); 
+      }
+      
+      // Combine with previous word when 'a' is pressed
+      if (e.key === 'a') {
+        // Combine with previous word
+        if (selectedWordIndex <= 0) return;
+        
+        const newComposedText = [...composedText];
+        
+        // Get the current word and previous word
+        const currentWord = newComposedText[selectedWordIndex];
+        const prevWord = newComposedText[selectedWordIndex - 1];
+        
+        // Skip if either is a linebreak
+        if ((typeof currentWord === 'object' && currentWord.type === 'linebreak') ||
+            (typeof prevWord === 'object' && prevWord.type === 'linebreak')) {
+          return;
+        }
+        
+        // Get the text of both words
+        const currentText = typeof currentWord === 'string' ? 
+          currentWord : 
+          (currentWord.type === 'text' ? currentWord.text : '');
+          
+        const prevText = typeof prevWord === 'string' ? 
+          prevWord : 
+          (prevWord.type === 'text' ? prevWord.text : '');
+        
+        // Combine the words with a space
+        const combinedText = `${prevText} ${currentText}`;
+        
+        // Replace the previous word with the combined word and remove the current word
+        newComposedText[selectedWordIndex - 1] = combinedText;
+        newComposedText.splice(selectedWordIndex, 1);
+        
+        // Update the text
+        setComposedText(newComposedText);
+        setSelectedWordIndex(selectedWordIndex - 1);
+        
+        e.preventDefault();
+      }
+      
+      // Combine with next word when 's' is pressed
+      if (e.key === 's') {
+        // Combine with next word
+        if (selectedWordIndex >= composedText.length - 1) return;
+        
+        const newComposedText = [...composedText];
+        
+        // Get the current word and next word
+        const currentWord = newComposedText[selectedWordIndex];
+        const nextWord = newComposedText[selectedWordIndex + 1];
+        
+        // Skip if either is a linebreak
+        if ((typeof currentWord === 'object' && currentWord.type === 'linebreak') ||
+            (typeof nextWord === 'object' && nextWord.type === 'linebreak')) {
+          return;
+        }
+        
+        // Get the text of both words
+        const currentText = typeof currentWord === 'string' ? 
+          currentWord : 
+          (currentWord.type === 'text' ? currentWord.text : '');
+          
+        const nextText = typeof nextWord === 'string' ? 
+          nextWord : 
+          (nextWord.type === 'text' ? nextWord.text : '');
+        
+        // Combine the words with a space
+        const combinedText = `${currentText} ${nextText}`;
+        
+        // Replace the current word with the combined word and remove the next word
+        newComposedText[selectedWordIndex] = combinedText;
+        newComposedText.splice(selectedWordIndex + 1, 1);
+        
+        // Update the text
+        setComposedText(newComposedText);
+        
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [selectedWordIndex, composedText]);
+  
+  // Close context menu when clicking elsewhere
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setContextMenu(prev => ({...prev, visible: false}));
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
+  const handleContinue = () => {
+    // Process the input text to extract words and phrases
+    const extractedWords = inputText
+      .split(/[\n,]+/) // Split by newline or comma
+      .map(word => word.trim())
+      .filter(word => word.length > 0);
+    
+    setWords(extractedWords);
+    setScreen(2);
+  };
+
+  const handleDragStart = (e, item, source) => {
+    setIsDragging(true);
+    setDraggedItem(item);
+    setDraggedItemSource(source);
+    e.dataTransfer.setData('text/plain', item);
+    // Make the drag image transparent
+    const img = new Image();
+    img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    e.dataTransfer.setDragImage(img, 0, 0);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e, targetArea) => {
+    e.preventDefault();
+    
+    if (targetArea === 'compose') {
+      if (draggedItemSource === 'compose') {
+        // Reordering within composed text
+        const newComposedText = [...composedText];
+        
+        // Find the dragged item index (could be any type of item including linebreaks)
+        let draggedIndex = -1;
+        for (let i = 0; i < newComposedText.length; i++) {
+          if ((typeof newComposedText[i] === 'string' && newComposedText[i] === draggedItem) ||
+              (typeof newComposedText[i] === 'object' && 
+               newComposedText[i].type === 'text' && 
+               newComposedText[i].text === draggedItem)) {
+            draggedIndex = i;
+            break;
+          }
+        }
+        
+        // Find the target index (where to drop)
+        const targetElement = e.target.closest('.word-btn, [data-index]');
+        if (targetElement) {
+          // Get the index from the data-index attribute
+          const targetIndex = parseInt(targetElement.getAttribute('data-index'));
+          
+          // Remove from old position and insert at new position
+          if (draggedIndex !== -1 && !isNaN(targetIndex)) {
+            const itemToMove = newComposedText[draggedIndex];
+            newComposedText.splice(draggedIndex, 1);
+            newComposedText.splice(targetIndex, 0, itemToMove);
+            setComposedText(newComposedText);
+          }
+        } else {
+          // If dropped not on a word button, add to the end
+          if (draggedIndex !== -1) {
+            const itemToMove = newComposedText[draggedIndex];
+            newComposedText.splice(draggedIndex, 1);
+            newComposedText.push(itemToMove);
+            setComposedText(newComposedText);
+          }
+        }
+      } else {
+        // Adding from words or suggestions to composed text
+        const newItem = draggedItem;
+        
+        // Find where to drop the new item
+        const targetElement = e.target.closest('.word-btn, [data-index]');
+        if (targetElement) {
+          // Get the index from the data-index attribute
+          const targetIndex = parseInt(targetElement.getAttribute('data-index'));
+          
+          if (!isNaN(targetIndex)) {
+            // Insert at the specific position
+            const newComposedText = [...composedText];
+            newComposedText.splice(targetIndex, 0, newItem);
+            setComposedText(newComposedText);
+          } else {
+            // Fallback: Add to the end
+            setComposedText([...composedText, newItem]);
+          }
+        } else {
+          // Dropped in empty area, add to the end
+          setComposedText([...composedText, newItem]);
+        }
+      }
+    } else if (targetArea === 'words') {
+      // Adding to words list if it's not already there
+      if (!words.includes(draggedItem) && draggedItemSource === 'suggestions') {
+        setWords([...words, draggedItem]);
+      }
+    }
+    
+    setIsDragging(false);
+    setDraggedItem(null);
+    setDraggedItemSource(null);
+  };
+
+  const handleAddToWords = (suggestion) => {
+    if (!words.includes(suggestion)) {
+      const newWords = [...words, suggestion];
+      setWords(newWords);
+    }
+  };
+
+  const handleClearText = () => {
+    setComposedText([]);
+    setManualText('');
+    setSaveMessage('');
+  };
+
+  // Handle selection of a word
+  const handleWordSelect = (index) => {
+    setSelectedWordIndex(index === selectedWordIndex ? null : index);
+  };
+
+  // Toggle word format between button and text
+  const toggleWordFormat = (index) => {
+    const newComposedText = [...composedText];
+    const item = newComposedText[index];
+    
+    if (typeof item === 'string') {
+      // Convert from string to object with type 'text'
+      newComposedText[index] = { type: 'text', text: item };
+    } else if (item.type === 'text') {
+      // Convert from object back to string
+      newComposedText[index] = item.text;
+    }
+    
+    setComposedText(newComposedText);
+    setSelectedWordIndex(null);
+  };
+
+  // Toggle period at the end of the word and create a line break
+  const togglePeriod = (index) => {
+    const newComposedText = [...composedText];
+    const item = newComposedText[index];
+    let shouldAddLineBreak = true;
+    
+    // Check if we need to add or remove a period
+    if (typeof item === 'string') {
+      if (item.endsWith('.')) {
+        // If it already ends with a period, remove it
+        newComposedText[index] = item.slice(0, -1);
+        shouldAddLineBreak = false; // Don't add line break when removing period
+        
+        // Remove the line break after this word if the next line is empty
+        if (index + 1 < newComposedText.length && 
+            typeof newComposedText[index + 1] === 'object' && 
+            newComposedText[index + 1].type === 'linebreak') {
+          
+          // Check if the line after the break is empty
+          let isNextLineEmpty = true;
+          let i = index + 2; // Start from the item after the linebreak
+          
+          // Check if there are words until the next linebreak
+          while (i < newComposedText.length && 
+                !(typeof newComposedText[i] === 'object' && 
+                  newComposedText[i].type === 'linebreak')) {
+            // If there's any content, the line is not empty
+            isNextLineEmpty = false;
+            break;
+          }
+          
+          // If the next line is empty or there is no next line, remove the linebreak
+          if (isNextLineEmpty) {
+            newComposedText.splice(index + 1, 1);
+          }
+        }
+      } else {
+        // If it doesn't end with a period, add one
+        newComposedText[index] = item + '.';
+      }
+    } else if (item.type === 'text') {
+      if (item.text.endsWith('.')) {
+        // If it already ends with a period, remove it
+        newComposedText[index] = { ...item, text: item.text.slice(0, -1) };
+        shouldAddLineBreak = false; // Don't add line break when removing period
+        
+        // Remove the line break after this word if the next line is empty
+        if (index + 1 < newComposedText.length && 
+            typeof newComposedText[index + 1] === 'object' && 
+            newComposedText[index + 1].type === 'linebreak') {
+          
+          // Check if the line after the break is empty
+          let isNextLineEmpty = true;
+          let i = index + 2; // Start from the item after the linebreak
+          
+          // Check if there are words until the next linebreak
+          while (i < newComposedText.length && 
+                !(typeof newComposedText[i] === 'object' && 
+                  newComposedText[i].type === 'linebreak')) {
+            // If there's any content, the line is not empty
+            isNextLineEmpty = false;
+            break;
+          }
+          
+          // If the next line is empty or there is no next line, remove the linebreak
+          if (isNextLineEmpty) {
+            newComposedText.splice(index + 1, 1);
+          }
+        }
+      } else {
+        // If it doesn't end with a period, add one
+        newComposedText[index] = { ...item, text: item.text + '.' };
+      }
+    }
+    
+    // Only add a line break if we added a period (not if we removed one)
+    if (shouldAddLineBreak) {
+      // Add a line break object after the current word
+      newComposedText.splice(index + 1, 0, { type: 'linebreak' });
+    }
+    
+    setComposedText(newComposedText);
+    setSelectedWordIndex(null);
+  };
+
+  // Handle manual text input in the composition area
+  const handleManualTextChange = (e) => {
+    setManualText(e.target.value);
+  };
+
+  // Add manual text as buttons
+  const handleAddManualText = () => {
+    if (manualText.trim()) {
+      // Split by spaces to create multiple buttons
+      const newWords = manualText.trim().split(/\s+/);
+      setComposedText([...composedText, ...newWords]);
+      setManualText('');
+    }
+  };
+  
+  // Handle right click on a word to show context menu
+  const handleWordRightClick = (e, index) => {
+    e.preventDefault(); // Prevent default context menu
+    
+    // Position the context menu near the cursor
+    setContextMenu({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      wordIndex: index
+    });
+  };
+  
+  // Handle delete word
+  const handleDeleteWord = (index) => {
+    // Use provided index or selected index
+    const wordIndex = (index !== undefined) ? index : selectedWordIndex;
+    
+    // Only proceed if a valid index
+    if (wordIndex === null || wordIndex === undefined) return;
+    
+    // Make a copy of the text array
+    const newComposedText = [...composedText];
+    
+    // Get the word to be removed
+    const item = newComposedText[wordIndex];
+    
+    // Remove the item at the selected index
+    newComposedText.splice(wordIndex, 1);
+    
+    // Update the composed text
+    setComposedText(newComposedText);
+    
+    // If it's a normal word (not a linebreak), add it back to words list
+    if (typeof item === 'string') {
+      // Clean the word (remove punctuation)
+      const cleanWord = item.replace(/[.,!?;:]+$/, '');
+      
+      // Add to words if not already there
+      if (!words.includes(cleanWord)) {
+        setWords([...words, cleanWord]);
+      }
+    } else if (item && item.type === 'text') {
+      // Handle text type item
+      const cleanWord = item.text.replace(/[.,!?;:]+$/, '');
+      
+      // Add to words if not already there
+      if (!words.includes(cleanWord)) {
+        setWords([...words, cleanWord]);
+      }
+    }
+    
+    // Clear the selection if needed
+    if (wordIndex === selectedWordIndex) {
+      setSelectedWordIndex(null);
+    }
+  };
+
+  // Get text from composed words, including line breaks
+  const getComposedTextString = () => {
+    let result = '';
+    let currentLine = '';
+    
+    composedText.forEach((item) => {
+      if (typeof item === 'object' && item.type === 'linebreak') {
+        // Add current line to result and start a new line
+        result += currentLine + '\n';
+        currentLine = '';
+      } else if (typeof item === 'string') {
+        // Add space only if not the first word in the line
+        if (currentLine.length > 0) currentLine += ' ';
+        currentLine += item;
+      } else if (typeof item === 'object' && item.type === 'text') {
+        // Add space only if not the first word in the line
+        if (currentLine.length > 0) currentLine += ' ';
+        currentLine += item.text;
+      }
+    });
+    
+    // Add the last line if it exists
+    if (currentLine.length > 0) {
+      result += currentLine;
+    }
+    
+    return result;
+  };
+
+  const handleSaveText = () => {
+    // Get text from composed words with line breaks
+    const composedTextString = getComposedTextString();
+    
+    // Add any manual text if present
+    const combinedText = manualText ? `${composedTextString}\n${manualText}` : composedTextString;
+    
+    // Display the save message with the composed text
+    setSaveMessage(`Vistaður texti:\n${combinedText}`);
+  };
+
+  return (
+    <div className="flex flex-col w-full h-full bg-gray-50 text-gray-800">
+      {screen === 1 ? (
+        // First screen - Input words and mood
+        <div className="p-6 h-full">
+          <h1 className="text-2xl font-bold mb-6 text-center">Textasmíða App - Skjár 1</h1>
+          
+          <div className="mb-6">
+            <label className="block mb-2 font-medium">Stemmning (valkvætt):</label>
+            <input 
+              type="text" 
+              value={mood}
+              onChange={(e) => setMood(e.target.value)}
+              placeholder="T.d. sorgleg, glaðleg, drungaleg..."
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div className="mb-6">
+            <label className="block mb-2 font-medium">Orð og setningar:</label>
+            <textarea 
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Skrifaðu orð og setningar hér - eitt í hverja línu eða aðskilið með kommu"
+              className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          
+          <div className="flex justify-center">
+            <button
+              onClick={handleContinue}
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg shadow-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              Áfram
+            </button>
+          </div>
+        </div>
+      ) : (
+        // Second screen - Compose text with left-right layout
+        <div className="p-4 h-full">
+          <h1 className="text-2xl font-bold mb-4 text-center">Textasmíða App - Skjár 2</h1>
+          
+          <table className="w-full border-collapse">
+            <tbody>
+              <tr>
+                {/* Left column - Text composition area (larger) */}
+                <td className="align-top w-3/5 pr-4">
+                  <h2 className="font-medium mb-2">Textinn þinn:</h2>
+                  <div 
+                    className="h-96 p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white overflow-auto flex flex-wrap gap-2 content-start"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, 'compose')}
+                  >
+                    {composedText.map((word, index) => {
+                      const isSelected = selectedWordIndex === index;
+                      
+                      // Handle line break elements
+                      if (typeof word === 'object' && word.type === 'linebreak') {
+                        return (
+                          <div 
+                            key={`linebreak-${index}`} 
+                            className="w-full h-0 border-b border-gray-200 my-2" 
+                            data-index={index}
+                            onContextMenu={(e) => handleWordRightClick(e, index)}
+                            onDoubleClick={() => handleDeleteWord(index)}
+                          />
+                        );
+                      }
+                      
+                      // Check if word is a string or an object with type 'text'
+                      if (typeof word === 'object' && word.type === 'text') {
+                        // Display as plain text with special styling
+                        return (
+                          <span 
+                            key={`text-${index}`}
+                            className={`inline-block px-2 py-1 text-gray-700 ${isSelected ? 'bg-yellow-100' : ''}`}
+                            onClick={() => handleWordSelect(index)}
+                            onContextMenu={(e) => handleWordRightClick(e, index)}
+                            onDoubleClick={() => handleDeleteWord(index)}
+                            data-index={index}
+                          >
+                            {word.text}{' '}
+                          </span>
+                        );
+                      } else {
+                        // Display as a draggable button with right-click menu
+                        return (
+                          <div 
+                            key={`${word}-${index}`}
+                            className={`word-btn ${isSelected ? 'ring-2 ring-yellow-400' : ''} bg-green-100 px-3 py-1 rounded-full border border-green-300 cursor-move text-sm font-medium`}
+                            draggable
+                            data-word={word}
+                            data-index={index}
+                            onDragStart={(e) => handleDragStart(e, word, 'compose')}
+                            onClick={() => handleWordSelect(index)}
+                            onContextMenu={(e) => handleWordRightClick(e, index)}
+                            onDoubleClick={() => handleDeleteWord(index)}
+                          >
+                            {word}
+                          </div>
+                        );
+                      }
+                    })}
+                  </div>
+                  
+                  {/* Manual text input field */}
+                  <div className="mt-4 flex gap-2">
+                    <input
+                      type="text"
+                      value={manualText}
+                      onChange={handleManualTextChange}
+                      className="flex-1 p-2 border border-gray-300 rounded-lg"
+                      placeholder="Skrifaðu texta hér..."
+                    />
+                    <button
+                      onClick={handleAddManualText}
+                      className="px-3 py-1 bg-blue-600 text-white rounded-lg"
+                    >
+                      Bæta við
+                    </button>
+                  </div>
+                  
+                  {/* Toggle instructions */}
+                  <div className="mt-2 text-sm text-gray-500">
+                    <p><strong>Tvísmelltu</strong> á orð til að eyða því, <strong>hægri-smelltu</strong> fyrir valmöguleika.</p>
+                    <p>Veldu orð og ýttu á: <strong>t</strong> fyrir texta, <strong>.</strong> fyrir punkt, <strong>a</strong> para við orð á undan, <strong>s</strong> para við orð á eftir.</p>
+                  </div>
+                  
+                  {/* Buttons */}
+                  <div className="flex justify-between mt-2">
+                    <button 
+                      onClick={handleClearText}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                    >
+                      Hreinsa
+                    </button>
+                    <button 
+                      onClick={handleSaveText}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    >
+                      Vista
+                    </button>
+                  </div>
+                  
+                  {/* Save message */}
+                  {saveMessage && (
+                    <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                      <pre className="whitespace-pre-wrap">{saveMessage}</pre>
+                    </div>
+                  )}
+                </td>
+                
+                {/* Right column - Three stacked boxes */}
+                <td className="align-top w-2/5 pl-4">
+                  <div className="flex flex-col gap-4">
+                    {/* Top box - User's words */}
+                    <div>
+                      <h2 className="font-medium mb-2">Orðin þín:</h2>
+                      <div 
+                        className="h-56 p-4 border border-gray-300 rounded-lg bg-white overflow-auto flex flex-wrap gap-2 content-start"
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, 'words')}
+                      >
+                        {words.map((word, index) => (
+                          <div
+                            key={`word-${index}`}
+                            className="word-btn bg-blue-100 px-3 py-1 rounded-full border border-blue-300 cursor-move text-sm font-medium"
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, word, 'words')}
+                          >
+                            {word}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Middle box - Suggestions */}
+                    <div>
+                      <h2 className="font-medium mb-2">Uppástungur:</h2>
+                      <div className="h-56 p-4 border border-gray-300 rounded-lg bg-white overflow-auto flex flex-wrap gap-2 content-start">
+                        {suggestions.map((suggestion, index) => (
+                          <div
+                            key={`suggestion-${index}`}
+                            className="word-btn bg-purple-100 px-3 py-1 rounded-full border border-purple-300 cursor-move text-sm font-medium"
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, suggestion, 'suggestions')}
+                            onClick={() => handleAddToWords(suggestion)}
+                          >
+                            {suggestion}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    {/* Bottom box - Empty for future use */}
+                    <div>
+                      <h2 className="font-medium mb-2 text-gray-400">Framtíðarreitur:</h2>
+                      <div className="h-56 p-4 border border-gray-200 border-dashed rounded-lg bg-gray-50">
+                        {/* Empty area for future use */}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          
+          {/* Context menu */}
+          {contextMenu.visible && (
+            <div 
+              style={{
+                position: 'fixed',
+                top: `${contextMenu.y}px`,
+                left: `${contextMenu.x}px`,
+                backgroundColor: 'white',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+                zIndex: 1000
+              }}
+            >
+              <button 
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                onClick={() => {
+                  handleDeleteWord(contextMenu.wordIndex);
+                  setContextMenu(prev => ({...prev, visible: false}));
+                }}
+              >
+                Eyða orði
+              </button>
+              {contextMenu.wordIndex > 0 && (
+                <button 
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                  onClick={() => {
+                    // Combine with previous word
+                    if (contextMenu.wordIndex <= 0) return;
+                    
+                    const newComposedText = [...composedText];
+                    
+                    // Get the current word and previous word
+                    const currentWord = newComposedText[contextMenu.wordIndex];
+                    const prevWord = newComposedText[contextMenu.wordIndex - 1];
+                    
+                    // Skip if either is a linebreak
+                    if ((typeof currentWord === 'object' && currentWord.type === 'linebreak') ||
+                        (typeof prevWord === 'object' && prevWord.type === 'linebreak')) {
+                      return;
+                    }
+                    
+                    // Get the text of both words
+                    const currentText = typeof currentWord === 'string' ? 
+                      currentWord : 
+                      (currentWord.type === 'text' ? currentWord.text : '');
+                      
+                    const prevText = typeof prevWord === 'string' ? 
+                      prevWord : 
+                      (prevWord.type === 'text' ? prevWord.text : '');
+                    
+                    // Combine the words with a space
+                    const combinedText = `${prevText} ${currentText}`;
+                    
+                    // Replace the previous word with the combined word and remove the current word
+                    newComposedText[contextMenu.wordIndex - 1] = combinedText;
+                    newComposedText.splice(contextMenu.wordIndex, 1);
+                    
+                    // Update the text
+                    setComposedText(newComposedText);
+                    setSelectedWordIndex(contextMenu.wordIndex - 1);
+                    setContextMenu(prev => ({...prev, visible: false}));
+                  }}
+                >
+                  Sameina við orðið á undan
+                </button>
+              )}
+              {contextMenu.wordIndex < composedText.length - 1 && (
+                <button 
+                  className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                  onClick={() => {
+                    // Combine with next word
+                    if (contextMenu.wordIndex >= composedText.length - 1) return;
+                    
+                    const newComposedText = [...composedText];
+                    
+                    // Get the current word and next word
+                    const currentWord = newComposedText[contextMenu.wordIndex];
+                    const nextWord = newComposedText[contextMenu.wordIndex + 1];
+                    
+                    // Skip if either is a linebreak
+                    if ((typeof currentWord === 'object' && currentWord.type === 'linebreak') ||
+                        (typeof nextWord === 'object' && nextWord.type === 'linebreak')) {
+                      return;
+                    }
+                    
+                    // Get the text of both words
+                    const currentText = typeof currentWord === 'string' ? 
+                      currentWord : 
+                      (currentWord.type === 'text' ? currentWord.text : '');
+                      
+                    const nextText = typeof nextWord === 'string' ? 
+                      nextWord : 
+                      (nextWord.type === 'text' ? nextWord.text : '');
+                    
+                    // Combine the words with a space
+                    const combinedText = `${currentText} ${nextText}`;
+                    
+                    // Replace the current word with the combined word and remove the next word
+                    newComposedText[contextMenu.wordIndex] = combinedText;
+                    newComposedText.splice(contextMenu.wordIndex + 1, 1);
+                    
+                    // Update the text
+                    setComposedText(newComposedText);
+                    setContextMenu(prev => ({...prev, visible: false}));
+                  }}
+                >
+                  Sameina við orðið á eftir
+                </button>
+              )}
+            </div>
+          )}
+          
+          {/* Back button */}
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => setScreen(1)}
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+            >
+              Til baka
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TextSmidaApp;
